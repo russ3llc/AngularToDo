@@ -31,21 +31,21 @@ function findByObject(obj, list) {
     return false;
 }
 
-var toDoApp = angular.module('toDo', []);
-toDoApp.controller('toDoCont', function($scope){
-	/*$scope.toDoText = "Enter task here.";*/
-	$scope.toDoTask = [{
-		id: 0,
-		task: "Finish programming ToDo list!",
-		category: ["programming", "hobby"],
-		checked: 0
-	},
-	{
-		id: 1,
-		task: "Check email!",
-		category: ["home"],
-		checked: 0
-	}];
+var toDoApp = angular.module('toDo', ['ngStorage']);
+toDoApp.controller('toDoCont', function($scope, $localStorage, $sessionStorage){
+	
+	$scope.$storage = $localStorage.$default({
+		pageCounter: 0
+	});
+	
+	$scope.updatePageCount = function(){
+		$scope.$storage.pageCounter = $scope.$storage.pageCounter + 1;
+	};
+	
+	$scope.loadTasks = function(){
+	};
+	
+	$scope.toDoTask = $scope.$storage.tasks;
 	
 	$scope.newToDoTask = "Enter task here.";
 	$scope.newCat = "Enter category here.";
@@ -57,7 +57,7 @@ toDoApp.controller('toDoCont', function($scope){
 		checked: 0
 	};
 	
-	$scope.categories = ["programming", "hobby", "home"];
+	$scope.categories = $scope.$storage.categories;
 	
 	$scope.addTask = function(newToDoTask){
 		$scope.toDoTask.push({
@@ -81,7 +81,9 @@ toDoApp.controller('toDoCont', function($scope){
 	$scope.editTask = function(task){
 		angular.forEach(task, function(value, key){
 			value.task = $scope.newToDoTask;
+			value.category = $scope.selectedCats;
 		});
+		$scope.selectedCats = [];
 	};
 	
 	$scope.editCat = function(cat){
@@ -104,6 +106,15 @@ toDoApp.controller('toDoCont', function($scope){
 	$scope.deleteTask = function(task){
 		angular.forEach(task, function(value, key){
 			removeByObject(value, $scope.toDoTask);
+			updateTaskOrder();
+		});
+	};
+	
+	var updateTaskOrder = function(){
+		var i = 0;
+		angular.forEach($scope.toDoTask, function(value, key){
+			value.id = i;
+			i ++;
 		});
 	};
 	
@@ -137,11 +148,12 @@ toDoApp.controller('toDoCont', function($scope){
 	};
 	
 	$scope.catIsSelected = function(cat){
-		if(containsObject(cat, $scope.selectedCats)){
-			return true;
-		}
-		else{
-			return false;
-		}
+		return(containsObject(cat, $scope.selectedCats))
+	};
+	
+	$scope.save = function(){
+		$scope.$storage.categories = $scope.categories;
+		$scope.$storage.tasks = $scope.toDoTask;
+		alert("Data saved.");
 	};
 });

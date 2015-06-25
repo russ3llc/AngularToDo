@@ -1,0 +1,2 @@
+-Organize the controller. Specifically, put all "ToDo" and "Categories" logic into their own services.
+-Color code category labels.
